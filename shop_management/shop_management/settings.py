@@ -26,6 +26,8 @@ SECRET_KEY = 'django-insecure-+xm=&^xy)b=%uoo1k*2tpp#ybpxtmg!h()65bkw^^$q@f&bv^k
 DEBUG = True
 
 ALLOWED_HOSTS = []
+AUTH_USER_MODEL = 'inventory.User'
+
 
 
 # Application definition
@@ -37,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'inventory',
 ]
 
 MIDDLEWARE = [

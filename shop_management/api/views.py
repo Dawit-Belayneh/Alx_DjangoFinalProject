@@ -6,3 +6,7 @@ from .serializers import UserSerializer, ProductSerializer, CustomerSerializer, 
 class UserListCreateAPIView(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+class CategoryListCrateAPIView(generics.ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import generics
-from inventory.models import User
+from inventory.models import User, Category
 from .serializers import UserSerializer, ProductSerializer, CustomerSerializer, SaleSerializer, SaleItemSerializer, CategorySerializer
 
 class UserListCreateAPIView(generics.ListCreateAPIView):

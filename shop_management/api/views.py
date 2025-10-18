@@ -9,18 +9,31 @@ from .serializers import (
     CustomerSerializer, 
     SaleSerializer, 
     SaleItemSerializer, 
-    CategorySerializer
+    CategorySerializer,
+    UserSignupSerializer,
+    UserLoginSerializer,
 )
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import AllowAny
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsAdminUserRole, IsAdminOrCashier
+from django.shortcuts import get_object_or_404
+
 
 # users list view api
 class UserListCreateAPIView(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUserRole]
 
 # user detail views api
 class UserDetailAPIView(generics.GenericAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUserRole]
     # get list or single user
     def get(self, request, pk=None):
 
@@ -42,7 +55,7 @@ class UserDetailAPIView(generics.GenericAPIView):
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = UserSerializer(user, data=request.data)
+        serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -63,12 +76,17 @@ class UserDetailAPIView(generics.GenericAPIView):
 class CategoryListCrateAPIView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrCashier]
+
 
 # category detail list
 
 class CategoryDetailAPIView(generics.GenericAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrCashier]
     # get list or single category
     def get(self, request, pk=None):
 
@@ -90,7 +108,7 @@ class CategoryDetailAPIView(generics.GenericAPIView):
         except Category.DoesNotExist:
             return Response({"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = CategorySerializer(category, data=request.data)
+        serializer = CategorySerializer(category, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -111,44 +129,33 @@ class CategoryDetailAPIView(generics.GenericAPIView):
 class ProductListCrateAPIView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrCashier]
 
 # product detail api view
 
 class ProductDetailAPIView(generics.GenericAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrCashier]
     # get list or single product
-    def get(self, request, pk=None):
-
-        if pk:
-            try:
-                product = Product.objects.get(pk=pk)
-                serializer = ProductSerializer(product)
-            except Product.DoesNotExist:
-                return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            products = Product.objects.all()
-            serializer = ProductSerializer(product, many=True)
+    def get(self, request, pk):
+        product = self.get_object()
+        serializer = self.get_serializer(product)
         return Response(serializer.data)
     #update single list
-    def patch(self, request, pk=None):
-        try:
-            product = Product.objects.get(pk=pk)
-        except Product.DoesNotExist:
-            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+    def patch(self, request, pk):
+        product = get_object_or_404(self.get_queryset(), pk=pk)
 
-        serializer = ProductSerializer(product, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.get_serializer(product, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
     #delete a single list
-    def delete(self, request, pk=None):
-        try:
-            product = Product.objects.get(pk=pk)
-        except Product.DoesNotExist:
-            return Response({"error": "Product not found"}, status=status.HTTP_400_BAD_REQUEST)
+    def delete(self, request, pk):
+        product = self.get_object()
         product.delete()
         return Response({"message": "Product deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
@@ -158,11 +165,15 @@ class ProductDetailAPIView(generics.GenericAPIView):
 class CustomerListCreateAPIView(generics.ListCreateAPIView):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrCashier]
 
 #customer detail list view
 class CustomerDetailAPIView(generics.GenericAPIView):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrCashier]
     # get list or single customer
     def get(self, request, pk=None):
 
@@ -179,12 +190,9 @@ class CustomerDetailAPIView(generics.GenericAPIView):
 
     # update single list
     def patch(self, request, pk=None):
-        try:
-            customer = Customer.objects.get(pk=pk)
-        except Customer.DoesNotExist:
-            return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+        customer = get_object_or_404(self.get_queryset(), pk=pk)
 
-        serializer = CustomerSerializer(customer, data=request.data)
+        serializer = CustomerSerializer(customer, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -204,11 +212,15 @@ class CustomerDetailAPIView(generics.GenericAPIView):
 class SaleItemListCreateAPIView(generics.ListCreateAPIView):
     queryset = SaleItem.objects.all()
     serializer_class = SaleItemSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrCashier]
 
 # sale item detail list
 class SaleItemDetailAPIView(generics.GenericAPIView):
     queryset = SaleItem.objects.all()
     serializer_class = SaleItemSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrCashier]
     # get list or single sale item
     def get(self, request, pk=None):
 
@@ -229,7 +241,7 @@ class SaleItemDetailAPIView(generics.GenericAPIView):
         except SaleItem.DoesNotExist:
             return Response({"error": "SaleItem not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = SaleItemSerializer(sale_item, data=request.data)
+        serializer = SaleItemSerializer(sale_item, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -247,11 +259,15 @@ class SaleItemDetailAPIView(generics.GenericAPIView):
 class SaleListCreateAPIView(generics.ListCreateAPIView):
     queryset = Sale.objects.all()
     serializer_class = SaleSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrCashier]
 
 # sale item detail api view
 class SaleDetailAPIView(generics.GenericAPIView):
     queryset = Sale.objects.all()
     serializer_class = SaleSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrCashier]
     # get list or single sale
     def get(self, request, pk=None):
 
@@ -273,7 +289,7 @@ class SaleDetailAPIView(generics.GenericAPIView):
         except Sale.DoesNotExist:
             return Response({"error": "Sale not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = SaleSerializer(sale_item, data=request.data)
+        serializer = SaleSerializer(sale_item, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -287,3 +303,38 @@ class SaleDetailAPIView(generics.GenericAPIView):
             return Response({"error": "Sale not found"}, status=status.HTTP_400_BAD_REQUEST)
         sale.delete()
         return Response({"message": "Sale deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+
+#login and signup views
+
+class SignupAPIView(generics.CreateAPIView):
+    serializer_class = UserSignupSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            "message": "User created successfully",
+            "token": token.key,
+            "username": user.username,
+            "role": user.role
+        }, status=status.HTTP_201_CREATED)
+
+
+class LoginAPIView(generics.GenericAPIView):
+    serializer_class = UserLoginSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            "token": token.key,
+            "username": user.username,
+            "role": user.role
+        }, status=status.HTTP_200_OK)

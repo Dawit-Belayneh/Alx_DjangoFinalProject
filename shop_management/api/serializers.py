@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from inventory.models import User, Category, Product, Customer, Sale, SaleItem
+from django.contrib.auth import authenticate
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -32,3 +33,30 @@ class SaleItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = SaleItem
         fields = '__all__'
+
+class UserSignupSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'password', 'role']
+
+    def create(self, validated_data):
+        user = User(
+            username=validated_data['username'],
+            role=validated_data.get('role', 'cashier')
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
+class UserLoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = authenticate(**data)
+        if user and user.is_active:
+            return user
+        raise serializers.ValidationError("Invalid username or password")
+

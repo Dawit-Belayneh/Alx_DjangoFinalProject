@@ -14,6 +14,7 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProductSerializer(serializers.ModelSerializer):
+    category = CategorySerializer()
     class Meta:
         model = Product
         fields = '__all__'
@@ -25,11 +26,15 @@ class CustomerSerializer(serializers.ModelSerializer):
 
 
 class SaleSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    customer = CustomerSerializer()
     class Meta:
         model = Sale
         fields = '__all__'
 
 class SaleItemSerializer(serializers.ModelSerializer):
+    sale = SaleSerializer()
+    product = ProductSerializer()
     class Meta:
         model = SaleItem
         fields = '__all__'

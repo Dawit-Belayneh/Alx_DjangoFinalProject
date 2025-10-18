@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import generics, status
+from rest_framework import generics, status, filters
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from inventory.models import User, Category, Product, Customer, Sale, SaleItem
@@ -21,12 +21,18 @@ from .permissions import IsAdminUserRole, IsAdminOrCashier
 from django.shortcuts import get_object_or_404
 
 
+
 # users list view api
 class UserListCreateAPIView(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, IsAdminUserRole]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["username", "role"]
+    ordering_fields =["date_joined", "id", "username"]
+    ordering = ["-date_joined"]
+    
 
 # user detail views api
 class UserDetailAPIView(generics.GenericAPIView):
@@ -78,6 +84,9 @@ class CategoryListCrateAPIView(generics.ListCreateAPIView):
     serializer_class = CategorySerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, IsAdminOrCashier]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["name"]
+    ordering = ["name"]
 
 
 # category detail list
@@ -131,6 +140,10 @@ class ProductListCrateAPIView(generics.ListCreateAPIView):
     serializer_class = ProductSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, IsAdminOrCashier]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["name", "price", "category"]
+    ordering_fields =["name", "price"]
+    ordering = ["-price"]
 
 # product detail api view
 
@@ -167,6 +180,11 @@ class CustomerListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = CustomerSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, IsAdminOrCashier]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["name", "created_at"]
+    ordering_fields =["name", "created_at"]
+    ordering = ["name"]
+    
 
 #customer detail list view
 class CustomerDetailAPIView(generics.GenericAPIView):
@@ -214,6 +232,10 @@ class SaleItemListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = SaleItemSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, IsAdminOrCashier]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["price", "product__price"]
+    ordering_fields =["price", "product__price"]
+    ordering = ["-price"]
 
 # sale item detail list
 class SaleItemDetailAPIView(generics.GenericAPIView):
@@ -261,6 +283,9 @@ class SaleListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = SaleSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, IsAdminOrCashier]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["total_amount"]
+    ordering = ["total_amount"]
 
 # sale item detail api view
 class SaleDetailAPIView(generics.GenericAPIView):

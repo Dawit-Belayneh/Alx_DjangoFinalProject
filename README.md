@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 🛍️ Shop Management API
 
 A **Django REST Framework (DRF)**-based backend system for managing shop operations. This project include full **authentication**, **role-based access control** (Admin & Cashier), and CRUD APIs for  **Products**, **Categories**, **Sales**, **Sale Items**, and **Customers**.

@@ -314,7 +314,7 @@ class SaleDetailAPIView(generics.GenericAPIView):
         except Sale.DoesNotExist:
             return Response({"error": "Sale not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = SaleSerializer(sale_item, data=request.data, partial=True)
+        serializer = SaleSerializer(sale, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
